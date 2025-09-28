@@ -3,288 +3,872 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C&M - Store</title>
+    <title>InfoStore - Sua Loja de Infoprodutos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="script.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .banner-slide {
+            animation: slideIn 0.8s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+<body class="bg-gray-50">
     <!-- Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-xl">T</span>
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-purple-600 font-bold text-xl">IS</span>
+                    </div>
+                    <h1 class="text-2xl font-bold">InfoStore</h1>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-800">TechStore</h1>
-            </div>
-            
-            <button id="cartBtn" class="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full hover:from-purple-700 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0V19a2 2 0 002 2h7a2 2 0 002-2v-4.5"></path>
-                </svg>
-                <span>Carrinho</span>
-                <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">0</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Products Grid -->
-        <div id="productsSection" class="fade-in">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Produtos em Destaque</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="productsGrid"></div>
-        </div>
-
-        <!-- Cart Sidebar -->
-        <div id="cartSidebar" class="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50">
-            <div class="p-6 border-b">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-gray-800">Seu Carrinho</h3>
-                    <button id="closeCart" class="text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
+                <div class="flex items-center space-x-4">
+                    <span class="bg-yellow-400 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        🔥 Promoção Ativa
+                    </span>
+                    <button onclick="openCart()" class="relative bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition flex items-center space-x-2">
+                        <span>🛒</span>
+                        <span>Carrinho</span>
+                        <div id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                            0
+                        </div>
                     </button>
                 </div>
             </div>
+        </div>
+    </header>
+
+    <!-- Banner Promocional -->
+    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-4 banner-slide">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-lg font-semibold">🎉 MEGA PROMOÇÃO: 50% OFF em todos os produtos! Use o cupom: MEGA50</p>
+        </div>
+    </div>
+
+    <!-- Banners de Destaque -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white card-hover">
+                <h3 class="text-xl font-bold mb-2">🚀 Canva Pro Premium</h3>
+                <p class="mb-4">Acesso completo por 1 ano inteiro!</p>
+                <span class="bg-white text-purple-600 px-4 py-2 rounded-full font-bold">R$ 29,90</span>
+            </div>
+            <div class="bg-gradient-to-r from-red-500 to-pink-600 rounded-lg p-6 text-white card-hover">
+                <h3 class="text-xl font-bold mb-2">📺 YouTube Premium</h3>
+                <p class="mb-4">Sem anúncios + YouTube Music!</p>
+                <span class="bg-white text-red-600 px-4 py-2 rounded-full font-bold">R$ 19,90</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produtos -->
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Nossos Produtos</h2>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid">
+            <!-- Produtos serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal do Carrinho -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">🛒 Meu Carrinho</h3>
+                <button onclick="closeCart()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
             
-            <div class="flex-1 overflow-y-auto p-6">
-                <div id="cartItems"></div>
-                
-                <!-- Coupon Section -->
-                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <h4 class="font-semibold text-gray-700 mb-2">Cupom de Desconto</h4>
-                    <div class="flex space-x-2">
-                        <input type="text" id="couponInput" placeholder="Digite seu cupom" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <button id="applyCoupon" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Aplicar</button>
-                    </div>
-                    <div id="couponMessage" class="mt-2 text-sm"></div>
-                </div>
-                
-                <!-- Cart Total -->
-                <div class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-gray-600">Subtotal:</span>
-                        <span id="subtotal" class="font-semibold">R$ 0,00</span>
-                    </div>
-                    <div id="discountRow" class="flex justify-between items-center mb-2 text-green-600" style="display: none;">
-                        <span>Desconto:</span>
-                        <span id="discountAmount">-R$ 0,00</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xl font-bold text-gray-800 border-t pt-2">
-                        <span>Total:</span>
-                        <span id="total">R$ 0,00</span>
-                    </div>
-                </div>
-                
-                <button id="checkoutBtn" class="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 font-semibold text-lg">
-                    Finalizar Compra
-                </button>
+            <div id="cart-items" class="space-y-4 mb-6">
+                <!-- Itens do carrinho serão inseridos aqui -->
             </div>
-        </div>
-
-        <!-- Checkout Modal -->
-        <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 fade-in">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Pagamento via PIX</h3>
-                
-                <!-- QR Code (simulado) -->
-                <div class="text-center mb-6">
-                    <div class="inline-block p-4 bg-white border-2 border-gray-300 rounded-lg">
-                        <p class="text-gray-500 text-sm">[QR Code Pix aqui]</p>
-                    </div>
+            
+            <div class="border-t pt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xl font-bold">Total:</span>
+                    <span id="cart-total" class="text-2xl font-bold text-green-600">R$ 0,00</span>
                 </div>
-                
-                <div class="text-center mb-6">
-                    <p class="text-gray-600 mb-2">Valor a pagar:</p>
-                    <p id="paymentAmount" class="text-3xl font-bold text-green-600">R$ 0,00</p>
-                </div>
-                
-                <!-- Pix Key -->
-                <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                    <p class="text-sm text-gray-600 mb-2">Chave PIX:</p>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <input type="text" id="pixKey" value="techstore@exemplo.com" readonly class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm">
-                        <button id="copyPixKey" class="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600 transition-colors">Copiar</button>
-                    </div>
-
-                    <p class="text-sm text-gray-600 mb-2">Pix Copia e Cola:</p>
-                    <div class="flex items-center space-x-2">
-                        <textarea id="pixPayload" readonly class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm h-16">
-00020126360014BR.GOV.BCB.PIX0114+5511999999995204000053039865406100.005802BR5920TechStore Pagamento6009SAO PAULO61080540900062070503***6304ABCD
-                        </textarea>
-                        <button id="copyPixPayload" class="bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700 transition-colors">Copiar</button>
-                    </div>
-                </div>
-                
                 <div class="flex space-x-4">
-                    <button id="cancelPayment" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition-colors">Cancelar</button>
-                    <button id="confirmPayment" class="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors pulse-animation">Confirmar Pagamento</button>
+                    <button onclick="closeCart()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">
+                        Continuar Comprando
+                    </button>
+                    <button onclick="checkoutCart()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        Finalizar Compra
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Success Modal -->
-        <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 fade-in text-center">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
+    <!-- Modal de Pagamento -->
+    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-lg w-full mx-4">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold mb-4" id="modal-title">💳 Finalizar Compra</h3>
+                
+                <!-- Resumo do Pedido -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h4 class="font-semibold mb-2">Resumo do Pedido:</h4>
+                    <div id="order-summary"></div>
+                    <div class="border-t pt-2 mt-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">Total:</span>
+                            <span class="text-2xl font-bold text-green-600" id="final-total"></span>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Pagamento Confirmado!</h3>
-                <p class="text-gray-600 mb-6">Sua compra foi processada com sucesso. Acesse seus produtos abaixo:</p>
-                <div id="productLinks" class="space-y-3 mb-6"></div>
-                <button id="closeSuccess" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300">
+
+                <!-- Cupom de Desconto -->
+                <div class="mb-6">
+                    <div class="flex space-x-2">
+                        <input type="text" id="coupon-input" placeholder="Digite seu cupom de desconto" class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button onclick="applyCoupon()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            Aplicar
+                        </button>
+                    </div>
+                    <div id="coupon-message" class="text-sm mt-2"></div>
+                </div>
+
+                <!-- Método de Pagamento PIX -->
+                <div class="mb-6">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-center space-x-2 mb-2">
+                            <span class="text-2xl">🏦</span>
+                            <span class="font-bold text-green-700">Pagamento via PIX</span>
+                        </div>
+                        <p class="text-sm text-green-600">Aprovação instantânea • Sem taxas</p>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">Escaneie o QR Code ou copie o código PIX:</p>
+                    <div class="flex justify-center mb-4">
+                        <canvas id="qr-code" class="border rounded-lg shadow-lg"></canvas>
+                    </div>
+                    
+                    <div class="bg-gray-100 p-3 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-700">PIX Copia e Cola:</span>
+                            <button onclick="copyPixCode()" class="text-purple-600 text-sm font-semibold hover:text-purple-800">
+                                📋 Copiar
+                            </button>
+                        </div>
+                        <p class="text-xs break-all bg-white p-2 rounded border" id="pix-code">00020126580014BR.GOV.BCB.PIX013636401234-5678-9012-3456-789012345678520400005303986540529.905802BR5925INFOSTORE LTDA6009SAO PAULO62070503***6304ABCD</p>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">
+                        Cancelar
+                    </button>
+                    <button onclick="confirmPayment()" class="flex-1 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition pulse-animation">
+                        ✅ Confirmar Pagamento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Pagamento -->
+    <div id="payment-confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div class="mb-6">
+                <div class="animate-spin w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-4"></div>
+                <h3 class="text-xl font-bold mb-2">Aguardando Pagamento...</h3>
+                <p class="text-gray-600">Verificando seu pagamento PIX</p>
+                <div class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div id="payment-progress" class="bg-purple-600 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Tempo restante: <span id="payment-timer">5:00</span></p>
+                </div>
+            </div>
+            <button onclick="cancelPaymentCheck()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400 transition">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Sucesso -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-lg w-full mx-4 text-center">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-2xl font-bold mb-4 text-green-600">Pagamento Confirmado!</h3>
+            <p class="text-gray-600 mb-6">Seus produtos estão prontos para download:</p>
+            
+            <!-- Lista de Produtos Comprados -->
+            <div id="purchased-products" class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                <!-- Produtos serão inseridos aqui -->
+            </div>
+            
+            <div class="flex space-x-4">
+                <button onclick="downloadAllProducts()" class="flex-1 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">
+                    📥 Baixar Todos
+                </button>
+                <button onclick="closeSuccessModal()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
                     Continuar Comprando
                 </button>
             </div>
+            
+            <p class="text-xs text-gray-500 mt-4">
+                💌 Os produtos também foram enviados para seu email
+            </p>
         </div>
-    </main>
+    </div>
+
+    <!-- Modal de Detalhes do Produto -->
+    <div id="product-details-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div id="product-icon" class="text-4xl mb-2"></div>
+                <h3 id="product-title" class="text-xl font-bold mb-2"></h3>
+                <p id="product-description" class="text-gray-600"></p>
+            </div>
+            
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <h4 class="font-semibold text-green-800 mb-2">📋 Instruções de Acesso:</h4>
+                <div id="product-instructions" class="text-sm text-green-700">
+                    <!-- Instruções específicas do produto -->
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h4 class="font-semibold text-blue-800 mb-2">🔑 Dados de Acesso:</h4>
+                <div id="product-credentials" class="text-sm text-blue-700 font-mono bg-white p-2 rounded border">
+                    <!-- Credenciais do produto -->
+                </div>
+                <button onclick="copyCredentials()" class="mt-2 text-blue-600 text-sm font-semibold hover:text-blue-800">
+                    📋 Copiar Dados
+                </button>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button onclick="downloadProductFile()" class="flex-1 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">
+                    📥 Baixar Arquivo
+                </button>
+                <button onclick="closeProductDetails()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-4">© 2024 InfoStore - Todos os direitos reservados</p>
+            <p class="text-sm text-gray-400">Suporte: contato@infostore.com | WhatsApp: (11) 99999-9999</p>
+        </div>
+    </footer>
 
     <script>
-        // Produtos
         const products = [
-            {id:1,name:"Smartphone Pro Max",price:2499.99,image:"📱",description:"Smartphone premium com câmera profissional",downloadLink:"#"},
-            {id:2,name:"Laptop Gaming",price:4999.99,image:"💻",description:"Laptop para jogos com placa de vídeo dedicada",downloadLink:"#"},
-            {id:3,name:"Fones Bluetooth",price:299.99,image:"🎧",description:"Fones sem fio com cancelamento de ruído",downloadLink:"#"},
-            {id:4,name:"Smartwatch",price:899.99,image:"⌚",description:"Relógio inteligente com monitoramento de saúde",downloadLink:"#"},
-            {id:5,name:"Tablet Pro",price:1899.99,image:"📱",description:"Tablet profissional para criatividade",downloadLink:"#"},
-            {id:6,name:"Console Gaming",price:2999.99,image:"🎮",description:"Console de última geração",downloadLink:"#"}
+            {
+                id: 1,
+                name: "Canva Pro Premium",
+                description: "Acesso completo ao Canva Pro por 12 meses",
+                price: 29.90,
+                originalPrice: 59.90,
+                icon: "🎨",
+                color: "from-blue-500 to-purple-600"
+            },
+            {
+                id: 2,
+                name: "YouTube Premium",
+                description: "YouTube sem anúncios + YouTube Music",
+                price: 19.90,
+                originalPrice: 39.90,
+                icon: "📺",
+                color: "from-red-500 to-pink-600"
+            },
+            {
+                id: 3,
+                name: "Netflix Premium",
+                description: "Conta Netflix Premium 4K por 6 meses",
+                price: 24.90,
+                originalPrice: 49.90,
+                icon: "🎬",
+                color: "from-red-600 to-black"
+            },
+            {
+                id: 4,
+                name: "Spotify Premium",
+                description: "Música sem limites por 12 meses",
+                price: 15.90,
+                originalPrice: 31.90,
+                icon: "🎵",
+                color: "from-green-500 to-green-700"
+            },
+            {
+                id: 5,
+                name: "Adobe Creative Suite",
+                description: "Photoshop, Illustrator e mais por 6 meses",
+                price: 49.90,
+                originalPrice: 99.90,
+                icon: "🎭",
+                color: "from-purple-600 to-blue-600"
+            },
+            {
+                id: 6,
+                name: "Microsoft Office 365",
+                description: "Pacote completo Office por 12 meses",
+                price: 34.90,
+                originalPrice: 69.90,
+                icon: "💼",
+                color: "from-blue-600 to-indigo-600"
+            }
         ];
 
-        // Cupons
-        const coupons = { 'DESCONTO10': 0.10, 'PRIMEIRACOMPRA': 0.15, 'BLACKFRIDAY': 0.20 };
-
         let cart = [];
+        let currentProduct = null;
+        let currentTotal = 0;
         let appliedCoupon = null;
-
-        const cartBtn = document.getElementById('cartBtn');
-        const cartSidebar = document.getElementById('cartSidebar');
-        const closeCart = document.getElementById('closeCart');
-        const cartCount = document.getElementById('cartCount');
-        const cartItems = document.getElementById('cartItems');
-        const subtotal = document.getElementById('subtotal');
-        const total = document.getElementById('total');
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        const checkoutModal = document.getElementById('checkoutModal');
-        const successModal = document.getElementById('successModal');
-
-        function init() {
-            renderProducts(); updateCartUI(); setupEventListeners();
-        }
+        
+        const coupons = {
+            'MEGA50': { discount: 0.5, description: '50% de desconto' },
+            'DESCONTO20': { discount: 0.2, description: '20% de desconto' },
+            'PRIMEIRA10': { discount: 0.1, description: '10% de desconto' }
+        };
 
         function renderProducts() {
-            const grid = document.getElementById('productsGrid');
+            const grid = document.getElementById('products-grid');
             grid.innerHTML = products.map(product => `
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="p-6 text-center">
-                        <div class="text-6xl mb-4">${product.image}</div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">${product.name}</h3>
-                        <p class="text-gray-600 mb-4">${product.description}</p>
-                        <div class="text-2xl font-bold text-purple-600 mb-4">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
-                        <button onclick="addToCart(${product.id})" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 font-semibold">Adicionar ao Carrinho</button>
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden card-hover">
+                    <div class="bg-gradient-to-r ${product.color} p-6 text-white text-center">
+                        <div class="text-4xl mb-2">${product.icon}</div>
+                        <h3 class="text-xl font-bold">${product.name}</h3>
                     </div>
-                </div>`).join('');
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">${product.description}</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-sm text-gray-500 line-through">R$ ${product.originalPrice.toFixed(2)}</span>
+                                <span class="text-2xl font-bold text-green-600 ml-2">R$ ${product.price.toFixed(2)}</span>
+                            </div>
+                            <span class="bg-red-500 text-white px-2 py-1 rounded text-sm font-bold">
+                                -${Math.round((1 - product.price/product.originalPrice) * 100)}%
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="addToCart(${product.id})" class="flex-1 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition">
+                                🛒 Carrinho
+                            </button>
+                            <button onclick="buyProduct(${product.id})" class="flex-1 bg-gradient-to-r ${product.color} text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                                Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            const existing = cart.find(item => item.id === productId);
-            if (existing) { existing.quantity += 1; } else { cart.push({...product, quantity:1}); }
-            updateCartUI();
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            updateCartCount();
+            
+            // Mostrar feedback visual
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Adicionado!';
+            button.style.backgroundColor = '#10b981';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = '';
+            }, 1500);
         }
 
-        function removeFromCart(productId) {
-            cart = cart.filter(item => item.id !== productId); updateCartUI();
+        function openCart() {
+            renderCartItems();
+            document.getElementById('cart-modal').classList.remove('hidden');
+            document.getElementById('cart-modal').classList.add('flex');
+        }
+
+        function closeCart() {
+            document.getElementById('cart-modal').classList.add('hidden');
+            document.getElementById('cart-modal').classList.remove('flex');
+        }
+
+        function renderCartItems() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Seu carrinho está vazio</p>';
+                cartTotal.textContent = 'R$ 0,00';
+                return;
+            }
+            
+            cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${item.icon}</span>
+                        <div>
+                            <h4 class="font-semibold">${item.name}</h4>
+                            <p class="text-sm text-gray-600">R$ ${item.price.toFixed(2)} cada</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateQuantity(${item.id}, -1)" class="bg-gray-300 text-gray-700 w-8 h-8 rounded-full hover:bg-gray-400 transition">-</button>
+                            <span class="font-semibold">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, 1)" class="bg-gray-300 text-gray-700 w-8 h-8 rounded-full hover:bg-gray-400 transition">+</button>
+                        </div>
+                        <span class="font-bold text-green-600">R$ ${(item.price * item.quantity).toFixed(2)}</span>
+                        <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 ml-2">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = `R$ ${total.toFixed(2)}`;
         }
 
         function updateQuantity(productId, change) {
-            const item = cart.find(i => i.id === productId);
-            if (item) { item.quantity += change; if (item.quantity <= 0) removeFromCart(productId); else updateCartUI(); }
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    renderCartItems();
+                    updateCartCount();
+                }
+            }
         }
 
-        function updateCartUI() {
-            const totalItems = cart.reduce((s,i)=>s+i.quantity,0);
-            cartCount.textContent = totalItems;
-            cartItems.innerHTML = cart.length===0 ? '<p class="text-gray-500 text-center py-8">Seu carrinho está vazio</p>' :
-                cart.map(item=>`
-                    <div class="flex items-center space-x-4 py-4 border-b border-gray-200">
-                        <div class="text-2xl">${item.image}</div>
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-800">${item.name}</h4>
-                            <p class="text-purple-600 font-bold">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="updateQuantity(${item.id},-1)" class="w-8 h-8 bg-gray-200 rounded-full">-</button>
-                            <span class="w-8 text-center font-semibold">${item.quantity}</span>
-                            <button onclick="updateQuantity(${item.id},1)" class="w-8 h-8 bg-gray-200 rounded-full">+</button>
-                        </div>
-                        <button onclick="removeFromCart(${item.id})" class="text-red-500">x</button>
-                    </div>`).join('');
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            renderCartItems();
+            updateCartCount();
+        }
 
-            const subtotalAmount = cart.reduce((s,i)=>s+i.price*i.quantity,0);
-            const discountAmount = appliedCoupon ? subtotalAmount*appliedCoupon.discount : 0;
-            const totalAmount = subtotalAmount-discountAmount;
+        function checkoutCart() {
+            if (cart.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+            
+            closeCart();
+            openPaymentModal();
+        }
 
-            subtotal.textContent = `R$ ${subtotalAmount.toFixed(2).replace('.',',')}`;
-            total.textContent = `R$ ${totalAmount.toFixed(2).replace('.',',')}`;
+        function buyProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            cart = [{ ...product, quantity: 1 }];
+            updateCartCount();
+            openPaymentModal();
+        }
 
-            document.getElementById('discountRow').style.display = appliedCoupon ? 'flex':'none';
-            document.getElementById('discountAmount').textContent = `-R$ ${discountAmount.toFixed(2).replace('.',',')}`;
-            checkoutBtn.disabled = cart.length===0;
+        function openPaymentModal() {
+            // Calcular total
+            currentTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            // Renderizar resumo do pedido
+            const orderSummary = document.getElementById('order-summary');
+            orderSummary.innerHTML = cart.map(item => `
+                <div class="flex justify-between text-sm mb-1">
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>R$ ${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+            
+            // Resetar cupom
+            appliedCoupon = null;
+            document.getElementById('coupon-input').value = '';
+            document.getElementById('coupon-message').innerHTML = '';
+            
+            updateFinalTotal();
+            generatePixCode();
+            
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('payment-modal').classList.add('flex');
+        }
+
+        function updateFinalTotal() {
+            let finalTotal = currentTotal;
+            
+            if (appliedCoupon) {
+                finalTotal = currentTotal * (1 - appliedCoupon.discount);
+            }
+            
+            document.getElementById('final-total').textContent = `R$ ${finalTotal.toFixed(2)}`;
+            return finalTotal;
         }
 
         function applyCoupon() {
-            const code=document.getElementById('couponInput').value.trim().toUpperCase();
-            const msg=document.getElementById('couponMessage');
-            if(coupons[code]){ appliedCoupon={code,discount:coupons[code]}; msg.innerHTML=`<span class="text-green-600">✓ ${coupons[code]*100}% OFF aplicado</span>`; }
-            else { msg.innerHTML='<span class="text-red-600">✗ Cupom inválido</span>'; }
-            updateCartUI();
+            const couponCode = document.getElementById('coupon-input').value.toUpperCase();
+            const messageDiv = document.getElementById('coupon-message');
+            
+            if (coupons[couponCode]) {
+                appliedCoupon = coupons[couponCode];
+                messageDiv.innerHTML = `<span class="text-green-600">✅ Cupom aplicado: ${appliedCoupon.description}</span>`;
+                updateFinalTotal();
+                generatePixCode();
+            } else {
+                messageDiv.innerHTML = '<span class="text-red-600">❌ Cupom inválido</span>';
+            }
         }
 
-        function setupEventListeners() {
-            cartBtn.onclick=()=>cartSidebar.classList.remove('translate-x-full');
-            closeCart.onclick=()=>cartSidebar.classList.add('translate-x-full');
-            document.getElementById('applyCoupon').onclick=applyCoupon;
-            checkoutBtn.onclick=()=>{
-                const amount=cart.reduce((s,i)=>s+i.price*i.quantity,0);
-                document.getElementById('paymentAmount').textContent=`R$ ${amount.toFixed(2).replace('.',',')}`;
-                checkoutModal.style.display='flex';
-            };
-            document.getElementById('cancelPayment').onclick=()=>checkoutModal.style.display='none';
-
-            // Copiar chave Pix
-            document.getElementById('copyPixKey').addEventListener('click',()=>{
-                const pixKey=document.getElementById('pixKey');
-                pixKey.select(); document.execCommand('copy');
-                const btn=document.getElementById('copyPixKey'); const original=btn.textContent;
-                btn.textContent='Copiado!'; btn.classList.add('bg-green-500');
-                setTimeout(()=>{btn.textContent=original;btn.classList.remove('bg-green-500');},2000);
+        function generatePixCode() {
+            const finalTotal = updateFinalTotal();
+            const pixData = `00020126580014BR.GOV.BCB.PIX013636401234-5678-9012-3456-789012345678520400005303986540${finalTotal.toFixed(2).replace('.', '')}5802BR5925INFOSTORE LTDA6009SAO PAULO62070503***6304ABCD`;
+            
+            document.getElementById('pix-code').textContent = pixData;
+            
+            QRCode.toCanvas(document.getElementById('qr-code'), pixData, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
             });
-
-            // Copiar Pix Copia e Cola
-            document.getElementById('copyPixPayload').addEventListener('click',()=>{
-                const pixPayload=document.getElementById('pixPayload');
-                pixPayload.select(); document.execCommand('copy');
-                const btn=document.getElementById('copyPixPayload'); const original=btn.textContent;
-                btn.textContent='Copiado!'; btn.classList.add('bg-green-500');
-                setTimeout(()=>{btn.textContent=original;btn.classList.remove('bg-green-500');},2000);
-            });
-
-            // Confirmar pagamento
-            document.getElementById('confirmPayment').onclick=()=>{
-                checkoutModal.style.display='none'; successModal.style.display='flex';
-                const links=document.getElementById('productLinks'); links.innerHTML=cart.map(item=>
-                    `<a href="${item.downloadLink}" class="block w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-lg">${item.name}</a>`).join('');
-                cart=[]; appliedCoupon=null; updateCartUI();
-            };
-            document.getElementById('closeSuccess').onclick=()=>successModal.style.display='none';
         }
 
-        init();
+        function copyPixCode() {
+            const pixCode = document.getElementById('pix-code').textContent;
+            navigator.clipboard.writeText(pixCode).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ Copiado!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            document.getElementById('payment-modal').classList.remove('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            document.getElementById('payment-modal').classList.remove('flex');
+        }
+
+        let paymentTimer;
+        let paymentProgress = 0;
+        let currentPurchasedProducts = [];
+
+        function confirmPayment() {
+            closeModal();
+            startPaymentVerification();
+        }
+
+        function startPaymentVerification() {
+            // Mostrar modal de confirmação
+            document.getElementById('payment-confirmation-modal').classList.remove('hidden');
+            document.getElementById('payment-confirmation-modal').classList.add('flex');
+            
+            // Simular verificação de pagamento (5 minutos = 300 segundos)
+            let timeLeft = 300;
+            paymentProgress = 0;
+            
+            paymentTimer = setInterval(() => {
+                timeLeft--;
+                paymentProgress += (100 / 300);
+                
+                // Atualizar timer
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('payment-timer').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Atualizar barra de progresso
+                document.getElementById('payment-progress').style.width = `${paymentProgress}%`;
+                
+                // Simular confirmação de pagamento após 8-15 segundos
+                if (timeLeft <= 285 && Math.random() > 0.7) {
+                    clearInterval(paymentTimer);
+                    paymentConfirmed();
+                }
+                
+                // Timeout
+                if (timeLeft <= 0) {
+                    clearInterval(paymentTimer);
+                    paymentTimeout();
+                }
+            }, 1000);
+        }
+
+        function paymentConfirmed() {
+            // Fechar modal de confirmação
+            document.getElementById('payment-confirmation-modal').classList.add('hidden');
+            document.getElementById('payment-confirmation-modal').classList.remove('flex');
+            
+            // Preparar produtos comprados
+            currentPurchasedProducts = [...cart];
+            
+            // Mostrar modal de sucesso
+            renderPurchasedProducts();
+            document.getElementById('success-modal').classList.remove('hidden');
+            document.getElementById('success-modal').classList.add('flex');
+            
+            // Limpar carrinho após compra
+            cart = [];
+            updateCartCount();
+        }
+
+        function paymentTimeout() {
+            document.getElementById('payment-confirmation-modal').classList.add('hidden');
+            document.getElementById('payment-confirmation-modal').classList.remove('flex');
+            alert('Tempo limite para pagamento expirado. Tente novamente.');
+        }
+
+        function cancelPaymentCheck() {
+            clearInterval(paymentTimer);
+            document.getElementById('payment-confirmation-modal').classList.add('hidden');
+            document.getElementById('payment-confirmation-modal').classList.remove('flex');
+        }
+
+        function renderPurchasedProducts() {
+            const container = document.getElementById('purchased-products');
+            container.innerHTML = currentPurchasedProducts.map(product => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${product.icon}</span>
+                        <div>
+                            <h4 class="font-semibold">${product.name}</h4>
+                            <p class="text-sm text-gray-600">Quantidade: ${product.quantity}</p>
+                        </div>
+                    </div>
+                    <button onclick="openProductDetails(${product.id})" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition">
+                        Ver Detalhes
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openProductDetails(productId) {
+            const product = currentPurchasedProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            // Preencher dados do produto
+            document.getElementById('product-icon').textContent = product.icon;
+            document.getElementById('product-title').textContent = product.name;
+            document.getElementById('product-description').textContent = product.description;
+
+            // Gerar instruções e credenciais específicas
+            const productData = generateProductData(product);
+            document.getElementById('product-instructions').innerHTML = productData.instructions;
+            document.getElementById('product-credentials').textContent = productData.credentials;
+
+            // Mostrar modal
+            document.getElementById('product-details-modal').classList.remove('hidden');
+            document.getElementById('product-details-modal').classList.add('flex');
+        }
+
+        function generateProductData(product) {
+            const data = {
+                1: { // Canva Pro
+                    instructions: `
+                        1. Acesse <strong>canva.com</strong><br>
+                        2. Faça login com os dados fornecidos<br>
+                        3. Aproveite todos os recursos Premium<br>
+                        4. Válido por 12 meses
+                    `,
+                    credentials: `Email: canva.premium.${Math.random().toString(36).substr(2, 8)}@gmail.com\nSenha: Canva${Math.random().toString(36).substr(2, 6)}2024`
+                },
+                2: { // YouTube Premium
+                    instructions: `
+                        1. Acesse <strong>youtube.com</strong><br>
+                        2. Faça login com os dados fornecidos<br>
+                        3. Aproveite vídeos sem anúncios<br>
+                        4. Inclui YouTube Music Premium
+                    `,
+                    credentials: `Email: yt.premium.${Math.random().toString(36).substr(2, 8)}@gmail.com\nSenha: YT${Math.random().toString(36).substr(2, 8)}2024`
+                },
+                3: { // Netflix
+                    instructions: `
+                        1. Acesse <strong>netflix.com</strong><br>
+                        2. Faça login com os dados fornecidos<br>
+                        3. Qualidade 4K disponível<br>
+                        4. Válido por 6 meses
+                    `,
+                    credentials: `Email: netflix.4k.${Math.random().toString(36).substr(2, 8)}@gmail.com\nSenha: NF${Math.random().toString(36).substr(2, 8)}2024`
+                },
+                4: { // Spotify
+                    instructions: `
+                        1. Acesse <strong>spotify.com</strong><br>
+                        2. Faça login com os dados fornecidos<br>
+                        3. Música sem anúncios e offline<br>
+                        4. Válido por 12 meses
+                    `,
+                    credentials: `Email: spotify.premium.${Math.random().toString(36).substr(2, 8)}@gmail.com\nSenha: SP${Math.random().toString(36).substr(2, 8)}2024`
+                },
+                5: { // Adobe
+                    instructions: `
+                        1. Baixe o Adobe Creative Cloud<br>
+                        2. Faça login com os dados fornecidos<br>
+                        3. Instale Photoshop, Illustrator, etc.<br>
+                        4. Válido por 6 meses
+                    `,
+                    credentials: `Email: adobe.creative.${Math.random().toString(36).substr(2, 8)}@gmail.com\nSenha: AD${Math.random().toString(36).substr(2, 8)}2024`
+                },
+                6: { // Office 365
+                    instructions: `
+                        1. Acesse <strong>office.com</strong><br>
+                        2. Faça login com os dados fornecidos<br>
+                        3. Baixe Word, Excel, PowerPoint<br>
+                        4. Válido por 12 meses
+                    `,
+                    credentials: `Email: office365.${Math.random().toString(36).substr(2, 8)}@outlook.com\nSenha: OF${Math.random().toString(36).substr(2, 8)}2024`
+                }
+            };
+
+            return data[product.id] || {
+                instructions: 'Instruções serão enviadas por email.',
+                credentials: 'Credenciais serão enviadas por email.'
+            };
+        }
+
+        function copyCredentials() {
+            const credentials = document.getElementById('product-credentials').textContent;
+            navigator.clipboard.writeText(credentials).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ Copiado!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function downloadProductFile() {
+            // Simular download de arquivo
+            const product = currentPurchasedProducts.find(p => 
+                p.name === document.getElementById('product-title').textContent
+            );
+            
+            if (product) {
+                // Criar arquivo de texto com as informações
+                const content = `
+PRODUTO: ${product.name}
+DESCRIÇÃO: ${product.description}
+
+DADOS DE ACESSO:
+${document.getElementById('product-credentials').textContent}
+
+INSTRUÇÕES:
+${document.getElementById('product-instructions').textContent.replace(/<[^>]*>/g, '')}
+
+SUPORTE: contato@infostore.com
+WhatsApp: (11) 99999-9999
+
+© 2024 InfoStore - Todos os direitos reservados
+                `;
+                
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${product.name.replace(/\s+/g, '_')}_InfoStore.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
+        }
+
+        function downloadAllProducts() {
+            currentPurchasedProducts.forEach((product, index) => {
+                setTimeout(() => {
+                    const productData = generateProductData(product);
+                    const content = `
+PRODUTO: ${product.name}
+DESCRIÇÃO: ${product.description}
+QUANTIDADE: ${product.quantity}
+
+DADOS DE ACESSO:
+${productData.credentials}
+
+INSTRUÇÕES:
+${productData.instructions.replace(/<[^>]*>/g, '')}
+
+SUPORTE: contato@infostore.com
+WhatsApp: (11) 99999-9999
+
+© 2024 InfoStore - Todos os direitos reservados
+                    `;
+                    
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${product.name.replace(/\s+/g, '_')}_InfoStore.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, index * 500); // Delay entre downloads
+            });
+        }
+
+        function closeProductDetails() {
+            document.getElementById('product-details-modal').classList.add('hidden');
+            document.getElementById('product-details-modal').classList.remove('flex');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+            document.getElementById('success-modal').classList.remove('flex');
+            currentPurchasedProducts = [];
+        }
+
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = totalItems;
+            
+            if (totalItems > 0) {
+                document.getElementById('cart-count').style.display = 'flex';
+            } else {
+                document.getElementById('cart-count').style.display = 'none';
+            }
+        }
+
+        // Inicializar a página
+        renderProducts();
+
+        // Animação do banner promocional
+        setInterval(() => {
+            const banner = document.querySelector('.banner-slide');
+            banner.style.animation = 'none';
+            setTimeout(() => {
+                banner.style.animation = 'slideIn 0.8s ease-out';
+            }, 100);
+        }, 10000);
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'986622c532f0dc15',t:'MTc1OTA5Mjg2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
